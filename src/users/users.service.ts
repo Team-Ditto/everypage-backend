@@ -30,9 +30,6 @@ export class UsersService {
   }
 
   async findAll() {
-    console.log(this.config.get('PORT'));
-    console.log(this.config.get('MONGODB_URI'));
-
     return await this.userModel.find({});
   }
 
