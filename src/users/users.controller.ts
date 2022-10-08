@@ -9,7 +9,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 
-import { FirebaseAuthGuard } from './../firebase/firebase-auth.guard';
+import { FirebaseAuthGuard } from '../firebase/firebase-auth.guard';
 import { UsersService } from './users.service';
 import { CreateUserDto, UpdateUserDto } from './dto';
 
@@ -19,8 +19,8 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post()
-  async create(@Body() createUserDto: CreateUserDto) {
-    return await this.usersService.create(createUserDto);
+  async createNewUser(@Body() createUserDto: CreateUserDto) {
+    return await this.usersService.createNewUser(createUserDto);
   }
 
   @Get()
