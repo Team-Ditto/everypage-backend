@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { Request } from 'express';
 
 import { Book, BookDocument } from './entities/book.entity';
 import { CreateBookDto, UpdateBookDto } from './dto';
@@ -19,8 +20,9 @@ export class BooksService {
     }
   }
 
-  async findAll() {
-    return await this.bookModel.find({}).populate('user');
+  async findAll(req: Request) {
+    console.log(req.user);
+    return await this.bookModel.find({ user: req.user }).populate('owner');
   }
 
   findOne(id: number) {

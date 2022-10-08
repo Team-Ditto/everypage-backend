@@ -6,12 +6,18 @@ import {
   Patch,
   Param,
   Delete,
+  UseGuards,
+  Req,
 } from '@nestjs/common';
+import { Request } from 'express';
+
+import { FirebaseAuthGuard } from 'src/firebase/firebase-auth.guard';
 import { BooksService } from './books.service';
 import { CreateBookDto } from './dto/create-book.dto';
 import { UpdateBookDto } from './dto/update-book.dto';
 
 @Controller('books')
+@UseGuards(FirebaseAuthGuard)
 export class BooksController {
   constructor(private readonly booksService: BooksService) {}
 
@@ -21,8 +27,8 @@ export class BooksController {
   }
 
   @Get()
-  findAll() {
-    return this.booksService.findAll();
+  findAll(@Req() req: Request) {
+    return this.booksService.findAll(req);
   }
 
   @Get(':id')
