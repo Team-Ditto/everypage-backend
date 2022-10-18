@@ -8,7 +8,7 @@ export enum ReaderType {
   Slow = 'Slow',
 }
 
-@Schema({ timestamps: true })
+@Schema({ timestamps: true, versionKey: false })
 export class User {
   @Prop({ type: String })
   _id: string;

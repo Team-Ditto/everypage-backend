@@ -11,12 +11,12 @@ export enum WishlistStatus {
   ForLater = 'For Later',
 }
 
-@Schema({ timestamps: true })
+@Schema({ timestamps: true, versionKey: false })
 export class Wishlist {
   @Prop({ required: true })
   name: string;
 
-  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'User' })
+  @Prop({ type: String, ref: 'User' })
   owner: User;
 
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Book' })

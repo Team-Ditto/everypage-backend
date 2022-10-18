@@ -25,7 +25,7 @@ export enum BookCondition {
   Old = 'Old',
 }
 
-@Schema({ timestamps: true })
+@Schema({ timestamps: true, versionKey: false })
 export class Book {
   @Prop({ required: true })
   title: string;
@@ -57,13 +57,13 @@ export class Book {
   @Prop({ type: String })
   genre: string;
 
-  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'User' })
+  @Prop({ type: String, ref: 'User' })
   owner: User;
 
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Library' })
   library: Library;
 
-  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'User' })
+  @Prop({ type: String, ref: 'User' })
   bearer: User;
 
   @Prop({ type: Boolean })
