@@ -1,45 +1,28 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, Put, Param, UseGuards } from '@nestjs/common';
 
 import { FirebaseAuthGuard } from '../firebase/firebase-auth.guard';
 import { UsersService } from './users.service';
 import { CreateUserDto, UpdateUserDto } from './dto';
+import { Response } from 'express';
 
 @Controller('users')
-@UseGuards(FirebaseAuthGuard)
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+    constructor(private readonly usersService: UsersService) {}
 
-  @Post()
-  async createNewUser(@Body() createUserDto: CreateUserDto) {
-    return await this.usersService.createNewUser(createUserDto);
-  }
+    @Post()
+    async createNewUser(@Body() createUserDto: CreateUserDto): Promise<Response> {
+        return this.usersService.createNewUser(createUserDto);
+    }
 
-  @Get()
-  findAll() {
-    return this.usersService.findAll();
-  }
+    @Get()
+    @UseGuards(FirebaseAuthGuard)
+    findAll() {
+        return this.usersService.findAll();
+    }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.usersService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(+id, updateUserDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.usersService.remove(+id);
-  }
+    @Put(':id')
+    @UseGuards(FirebaseAuthGuard)
+    update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+        return this.usersService.update(+id, updateUserDto);
+    }
 }
