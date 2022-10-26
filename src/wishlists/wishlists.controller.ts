@@ -1,48 +1,39 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-  UseGuards,
-} from '@nestjs/common';
-import { WishlistsService } from './wishlists.service';
-import { CreateWishlistDto } from './dto/create-wishlist.dto';
-import { UpdateWishlistDto } from './dto/update-wishlist.dto';
+import { Request } from 'express';
+import { Controller, Get, Post, Body, Put, Param, Delete, UseGuards, Req, Query } from '@nestjs/common';
+
 import { FirebaseAuthGuard } from 'src/firebase/firebase-auth.guard';
+import { WishlistsService } from './wishlists.service';
+import { CreateWishlistDto, UpdateWishlistDto, StatusWishlistDto, DeleteWishlistDto } from './dto';
 
 @Controller('wishlists')
 @UseGuards(FirebaseAuthGuard)
 export class WishlistsController {
-  constructor(private readonly wishlistsService: WishlistsService) {}
+    constructor(private readonly wishlistsService: WishlistsService) {}
 
-  @Post()
-  create(@Body() createWishlistDto: CreateWishlistDto) {
-    return this.wishlistsService.create(createWishlistDto);
-  }
+    @Post()
+    createNewWishlist(@Req() req: Request, @Body() createWishlistDto: CreateWishlistDto) {
+        return this.wishlistsService.createNewWishlist(req, createWishlistDto);
+    }
 
-  @Get()
-  findAll() {
-    return this.wishlistsService.findAll();
-  }
+    @Get()
+    getWishlistsByStatus(@Req() req: Request, @Query() wishlistStatus: StatusWishlistDto) {
+        console.log(wishlistStatus);
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.wishlistsService.findOne(+id);
-  }
+        return this.wishlistsService.getWishlistsByStatus(req, wishlistStatus.status);
+    }
 
-  @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateWishlistDto: UpdateWishlistDto,
-  ) {
-    return this.wishlistsService.update(+id, updateWishlistDto);
-  }
+    @Get(':id')
+    getWishlistById(@Param('id') id: string) {
+        return this.wishlistsService.getWishlistById(id);
+    }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.wishlistsService.remove(+id);
-  }
+    @Put(':id')
+    updateWishlistById(@Param('id') id: string, @Body() updateWishlistDto: UpdateWishlistDto) {
+        return this.wishlistsService.updateWishlistById(id, updateWishlistDto);
+    }
+
+    @Delete('')
+    deleteMultipleWishlists(@Req() req: Request, @Body() deleteWishlistDto: DeleteWishlistDto) {
+        return this.wishlistsService.deleteMultipleWishlists(req, deleteWishlistDto.ids);
+    }
 }

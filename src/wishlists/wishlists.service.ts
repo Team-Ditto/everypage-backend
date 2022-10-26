@@ -1,26 +1,80 @@
-import { Injectable } from '@nestjs/common';
-import { CreateWishlistDto } from './dto/create-wishlist.dto';
-import { UpdateWishlistDto } from './dto/update-wishlist.dto';
+import { Request } from 'express';
+import { HttpException, HttpStatus, Injectable, Logger, Req } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+
+import { Wishlist, WishlistDocument, WishlistStatus } from './entities/wishlist.entity';
+import { CreateWishlistDto, UpdateWishlistDto } from './dto';
+import { FirebaseUser } from 'src/users/users.service';
 
 @Injectable()
 export class WishlistsService {
-  create(createWishlistDto: CreateWishlistDto) {
-    return 'This action adds a new wishlist';
-  }
+    private readonly logger = new Logger(WishlistsService.name);
 
-  findAll() {
-    return `This action returns all wishlists`;
-  }
+    constructor(@InjectModel(Wishlist.name) private wishlistModel: Model<WishlistDocument>) {}
 
-  findOne(id: number) {
-    return `This action returns a #${id} wishlist`;
-  }
+    async createNewWishlist(@Req() req: Request, createWishlistDto: CreateWishlistDto): Promise<WishlistDocument> {
+        try {
+            createWishlistDto.owner = (req.user as FirebaseUser).uid;
+            const wishlist = await this.wishlistModel.create(createWishlistDto);
 
-  update(id: number, updateWishlistDto: UpdateWishlistDto) {
-    return `This action updates a #${id} wishlist`;
-  }
+            return wishlist;
+        } catch (error) {
+            this.logger.error(error);
+            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 
-  remove(id: number) {
-    return `This action removes a #${id} wishlist`;
-  }
+    async getWishlistsByStatus(@Req() req: Request, wishListStatus: WishlistStatus): Promise<WishlistDocument[]> {
+        try {
+            this.logger.log('getting all the wishlists by ' + wishListStatus);
+            return await this.wishlistModel
+                .find({ owner: (req.user as FirebaseUser).uid, status: wishListStatus })
+                .populate('owner')
+                .populate('book');
+        } catch (error) {
+            this.logger.error(error);
+            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    async getWishlistById(wishlistId: string): Promise<WishlistDocument> {
+        try {
+            return await this.wishlistModel.findById(wishlistId).populate('owner').populate('book');
+        } catch (error) {
+            this.logger.error(error);
+            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    async updateWishlistById(wishlistId: string, updateWishlistDto: UpdateWishlistDto): Promise<WishlistDocument> {
+        // Finally, update the taxonomy with the update code.
+        const updateOptions = {
+            // Create if not already there.
+            upsert: false,
+
+            // Return the new object instead of the original.
+            new: true,
+
+            // Apply the defaults specified in the model's schema if a new document is created.
+            setDefaultsOnInsert: false,
+        };
+
+        try {
+            const updatedWishlist = await this.wishlistModel.findByIdAndUpdate(
+                wishlistId,
+                updateWishlistDto,
+                updateOptions,
+            );
+
+            return updatedWishlist;
+        } catch (error) {
+            this.logger.error(error);
+            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    async deleteMultipleWishlists(@Req() req: Request, ids: string[]) {
+        await this.wishlistModel.deleteMany({ _id: { $in: ids }, owner: (req.user as FirebaseUser).uid });
+    }
 }

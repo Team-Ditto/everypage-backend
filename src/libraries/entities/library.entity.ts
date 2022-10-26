@@ -8,14 +8,14 @@ export type LibraryDocument = Library & Document;
 
 @Schema({ timestamps: true, versionKey: false })
 export class Library {
-  @Prop({ required: true })
-  name: string;
+    @Prop({ required: true })
+    name: string;
 
-  @Prop({ type: String, ref: 'User' })
-  owner: User;
+    @Prop({ type: String, ref: 'User' })
+    owner: User;
 
-  @Prop({ type: [{ type: MongooseSchema.Types.ObjectId, ref: 'Book' }] })
-  books: Book[];
+    @Prop({ type: [{ type: MongooseSchema.Types.ObjectId, ref: 'Book' }] })
+    books: Book[];
 }
 
 export const LibrarySchema = SchemaFactory.createForClass(Library);

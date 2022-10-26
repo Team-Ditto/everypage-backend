@@ -7,23 +7,23 @@ import { User } from 'src/users/entities/user.entity';
 export type WishlistDocument = Wishlist & Document;
 
 export enum WishlistStatus {
-  Requested = 'Requested',
-  ForLater = 'For Later',
+    Requested = 'Requested',
+    ForLater = 'For Later',
 }
 
 @Schema({ timestamps: true, versionKey: false })
 export class Wishlist {
-  @Prop({ required: true })
-  name: string;
+    @Prop({ type: String })
+    name: string;
 
-  @Prop({ type: String, ref: 'User' })
-  owner: User;
+    @Prop({ type: String, ref: 'User' })
+    owner: User;
 
-  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Book' })
-  book: Book;
+    @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Book' })
+    book: Book;
 
-  @Prop({ type: String, enum: WishlistStatus })
-  status: WishlistStatus;
+    @Prop({ type: String, enum: WishlistStatus })
+    status: WishlistStatus;
 }
 
 export const WishlistSchema = SchemaFactory.createForClass(Wishlist);
