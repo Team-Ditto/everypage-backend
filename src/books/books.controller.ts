@@ -1,48 +1,47 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-  UseGuards,
-  Req,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, Put, Param, Delete, UseGuards, Req } from '@nestjs/common';
 import { Request } from 'express';
 
 import { FirebaseAuthGuard } from 'src/firebase/firebase-auth.guard';
 import { BooksService } from './books.service';
-import { CreateBookDto } from './dto/create-book.dto';
-import { UpdateBookDto } from './dto/update-book.dto';
+import { CreateBookDto, UpdateBookDto } from './dto';
 
 @Controller('books')
 @UseGuards(FirebaseAuthGuard)
 export class BooksController {
-  constructor(private readonly booksService: BooksService) {}
+    constructor(private readonly booksService: BooksService) {}
 
-  @Post()
-  create(@Body() createBookDto: CreateBookDto) {
-    return this.booksService.create(createBookDto);
-  }
+    @Post()
+    createNewBook(@Req() req: Request, @Body() createBookDto: CreateBookDto) {
+        return this.booksService.createNewBook(req, createBookDto);
+    }
 
-  @Get()
-  findAll(@Req() req: Request) {
-    return this.booksService.findAll(req);
-  }
+    @Get('mine')
+    getMyBooks(@Req() req: Request) {
+        return this.booksService.getMyBooks(req);
+    }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.booksService.findOne(+id);
-  }
+    @Get('all')
+    getAllBooks() {
+        return this.booksService.getAllBooks();
+    }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateBookDto: UpdateBookDto) {
-    return this.booksService.update(+id, updateBookDto);
-  }
+    @Get('user/:id')
+    getUserBooks(@Param('id') id: string) {
+        return this.booksService.getUserBooks(id);
+    }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.booksService.remove(+id);
-  }
+    @Get(':id')
+    getBookById(@Param('id') id: string) {
+        return this.booksService.getBookById(id);
+    }
+
+    @Put(':id')
+    updateBookById(@Param('id') id: string, @Body() updateBookDto: UpdateBookDto) {
+        return this.booksService.updateBookById(id, updateBookDto);
+    }
+
+    @Delete(':id')
+    remove(@Param('id') id: string) {
+        return this.booksService.remove(id);
+    }
 }
