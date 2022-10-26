@@ -1,11 +1,16 @@
 import { ConfigService } from '@nestjs/config';
-import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger, Req } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
 import { EnvironmentVariables } from 'src/env.validation';
 import { User, UserDocument } from './entities/user.entity';
 import { CreateUserDto, UpdateUserDto } from './dto';
+import { Request } from 'express';
+
+export interface FirebaseUser {
+    uid: string;
+}
 
 @Injectable()
 export class UsersService {
@@ -38,17 +43,60 @@ export class UsersService {
         }
     }
 
+    /**
+     * returns all the user in the database
+     * not meant to use in the frontend
+     * @returns the users
+     */
     async findAll() {
         this.logger.log('getting all the users');
         return await this.userModel.find({});
     }
 
-    findOne(id: number) {
-        return `This action returns a #${id} user`;
+    /**
+     * return my profile
+     * @returns my user
+     */
+    async myProfile(@Req() req: Request) {
+        try {
+            return this.userModel.findById((req.user as FirebaseUser).uid);
+        } catch (error) {
+            this.logger.error(error);
+            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
-    update(id: number, updateUserDto: UpdateUserDto) {
-        return `This action updates a #${id} user`;
+    /**
+     *
+     * @param req
+     * @param updateUserDto
+     * @returns
+     */
+    async update(@Req() req: Request, updateUserDto: UpdateUserDto) {
+        // Finally, update the taxonomy with the update code.
+        const updateOptions = {
+            // Create if not already there.
+            upsert: false,
+
+            // Return the new object instead of the original.
+            new: true,
+
+            // Apply the defaults specified in the model's schema if a new document is created.
+            setDefaultsOnInsert: false,
+        };
+
+        try {
+            const updatedProfile = await this.userModel.findByIdAndUpdate(
+                (req.user as FirebaseUser).uid,
+                updateUserDto,
+                updateOptions,
+            );
+
+            return updatedProfile;
+        } catch (error) {
+            this.logger.error(error);
+            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     remove(id: number) {

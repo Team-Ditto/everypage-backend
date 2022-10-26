@@ -1,12 +1,34 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import mongoose, { Document } from 'mongoose';
 
 export type UserDocument = User & Document;
 
 export enum ReaderType {
     Fast = 'Fast',
+    Casual = 'Casual',
     Slow = 'Slow',
 }
+
+export interface PointSchemaType {
+    type: string;
+    coordinates: number[];
+}
+
+const PointSchema = new mongoose.Schema<PointSchemaType>(
+    {
+        type: {
+            type: String,
+            enum: ['point'],
+            default: 'point',
+            required: true,
+        },
+        coordinates: {
+            type: [Number],
+            required: true,
+        },
+    },
+    { _id: false },
+);
 
 @Schema({ timestamps: true, versionKey: false })
 export class User {
@@ -22,8 +44,8 @@ export class User {
     @Prop({ type: String, required: true })
     photoURL: string;
 
-    @Prop({ type: String })
-    location: string;
+    @Prop({ type: PointSchema })
+    location: PointSchemaType;
 
     @Prop({ type: String, enum: ReaderType })
     readerType: ReaderType;
