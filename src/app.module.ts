@@ -13,19 +13,19 @@ import { LibrariesModule } from './libraries/libraries.module';
 import { WishlistsModule } from './wishlists/wishlists.module';
 
 @Module({
-  imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
-      validate,
-    }),
-    MongooseModule.forRoot(process.env.MONGODB_URI),
-    BooksModule,
-    UsersModule,
-    LibrariesModule,
-    WishlistsModule,
-  ],
-  controllers: [AppController],
-  providers: [FirebaseJwtStrategy, AppService],
-  exports: [FirebaseJwtStrategy],
+    imports: [
+        ConfigModule.forRoot({
+            isGlobal: true,
+            validate,
+        }),
+        MongooseModule.forRoot(process.env.MONGODB_URI),
+        BooksModule,
+        UsersModule,
+        LibrariesModule,
+        WishlistsModule,
+    ],
+    controllers: [AppController],
+    providers: [FirebaseJwtStrategy, AppService],
+    exports: [FirebaseJwtStrategy],
 })
 export class AppModule {}

@@ -1,5 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import mongoose, { Document } from 'mongoose';
+import mongoose, { Document, Schema as MongooseSchema } from 'mongoose';
+
+import { Wishlist } from 'src/wishlists/entities/wishlist.entity';
 
 export type UserDocument = User & Document;
 
@@ -49,6 +51,9 @@ export class User {
 
     @Prop({ type: String, enum: ReaderType })
     readerType: ReaderType;
+
+    @Prop({ type: [{ type: MongooseSchema.Types.ObjectId, ref: 'Wishlist' }] })
+    wishlists: Wishlist[];
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

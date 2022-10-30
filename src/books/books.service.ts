@@ -65,7 +65,7 @@ export class BooksService {
     }
 
     async updateBookById(bookId: string, updateBookDto: UpdateBookDto): Promise<BookDocument> {
-        // Finally, update the taxonomy with the update code.
+        
         const updateOptions = {
             // Create if not already there.
             upsert: false,

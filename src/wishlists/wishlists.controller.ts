@@ -17,8 +17,6 @@ export class WishlistsController {
 
     @Get()
     getWishlistsByStatus(@Req() req: Request, @Query() wishlistStatus: StatusWishlistDto) {
-        console.log(wishlistStatus);
-
         return this.wishlistsService.getWishlistsByStatus(req, wishlistStatus.status);
     }
 

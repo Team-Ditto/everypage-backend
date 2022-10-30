@@ -22,7 +22,7 @@ export class Wishlist {
     @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Book' })
     book: Book;
 
-    @Prop({ type: String, enum: WishlistStatus })
+    @Prop({ type: String, enum: WishlistStatus, default: WishlistStatus.Requested })
     status: WishlistStatus;
 }
 

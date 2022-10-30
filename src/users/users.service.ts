@@ -12,6 +12,11 @@ export interface FirebaseUser {
     uid: string;
 }
 
+export enum WishlistOperation {
+    Add = 'add',
+    Remove = 'remove',
+}
+
 @Injectable()
 export class UsersService {
     private readonly logger = new Logger(UsersService.name);
@@ -59,7 +64,7 @@ export class UsersService {
      */
     async myProfile(@Req() req: Request) {
         try {
-            return this.userModel.findById((req.user as FirebaseUser).uid);
+            return this.userModel.findById((req.user as FirebaseUser).uid).populate('wishlists');
         } catch (error) {
             this.logger.error(error);
             throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -67,13 +72,12 @@ export class UsersService {
     }
 
     /**
-     *
+     * updates the currently logged in user
      * @param req
      * @param updateUserDto
-     * @returns
+     * @returns updated user
      */
     async update(@Req() req: Request, updateUserDto: UpdateUserDto) {
-        // Finally, update the taxonomy with the update code.
         const updateOptions = {
             // Create if not already there.
             upsert: false,
@@ -101,5 +105,34 @@ export class UsersService {
 
     remove(id: number) {
         return `This action removes a #${id} user`;
+    }
+
+    /**
+     * adds/removes wishlists from the user
+     * @param operation the add/remove operation
+     * @param userId the user ID
+     * @param wishlistIds the array of wishlist ids
+     */
+    async updateUsersWishlists(operation: WishlistOperation, userId: string, wishlistIds: any[]) {
+        const updateOptions = {
+            // Create if not already there.
+            upsert: false,
+
+            // Return the new object instead of the original.
+            new: true,
+
+            // Apply the defaults specified in the model's schema if a new document is created.
+            setDefaultsOnInsert: false,
+        };
+
+        let updateQuery;
+
+        if (operation === WishlistOperation.Add) {
+            updateQuery = { $push: { wishlists: { $each: wishlistIds } } };
+        } else {
+            updateQuery = { $pull: { wishlists: { $in: wishlistIds } } };
+        }
+
+        await this.userModel.findOneAndUpdate({ _id: userId }, updateQuery, updateOptions);
     }
 }
