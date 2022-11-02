@@ -1,5 +1,4 @@
-import { Type } from 'class-transformer';
-import { IsEnum, IsOptional } from 'class-validator';
+import { IsBoolean, IsEnum, IsOptional } from 'class-validator';
 import { PointSchemaType, ReaderType } from '../entities/user.entity';
 
 export class UpdateUserDto {
@@ -7,10 +6,9 @@ export class UpdateUserDto {
     // @IsOptional()
     // displayName: string;
 
-    // @IsString()
-    // @IsOptional()
-    // @IsOptional()
-    // photoURL: string;
+    @IsBoolean()
+    @IsOptional()
+    firstTimeLogin: boolean;
 
     @IsEnum(ReaderType)
     @IsOptional()

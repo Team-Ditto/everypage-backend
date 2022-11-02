@@ -54,6 +54,9 @@ export class User {
 
     @Prop({ type: [{ type: MongooseSchema.Types.ObjectId, ref: 'Wishlist' }] })
     wishlists: Wishlist[];
+
+    @Prop({ type: Boolean, default: true })
+    firstTimeLogin: boolean;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
