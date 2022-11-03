@@ -65,7 +65,6 @@ export class BooksService {
     }
 
     async updateBookById(bookId: string, updateBookDto: UpdateBookDto): Promise<BookDocument> {
-        
         const updateOptions = {
             // Create if not already there.
             upsert: false,

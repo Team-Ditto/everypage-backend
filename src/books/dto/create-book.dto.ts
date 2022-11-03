@@ -15,45 +15,38 @@ export class CreateBookDto {
 
     @IsString()
     @IsNotEmpty()
-    edition: string;
+    language: string;
 
     @IsString()
     @IsNotEmpty()
-    description: string;
+    genre: string;
 
-    @IsEnum(BookCondition)
+    @IsString()
     @IsNotEmpty()
-    condition: BookCondition;
-
-    @IsString({ each: true })
-    images: string[];
+    edition: string;
 
     @IsNumber()
     @IsNotEmpty()
-    isbn: number;
+    ISBN: number;
 
-    @IsString()
+    @IsEnum(BookCondition)
     @IsNotEmpty()
-    language: string;
+    bookCondition: BookCondition;
+
+    @IsEnum(BookReadingStatus)
+    @IsNotEmpty()
+    readingStatus: BookReadingStatus;
 
     @IsString()
     @IsNotEmpty()
     location: string;
 
     @IsString({ each: true })
-    tags: string[];
-
-    @IsString()
-    @IsNotEmpty()
-    genre: string;
+    images: string[];
 
     @IsBoolean()
     @IsNotEmpty()
     shareable: boolean;
-
-    @IsEnum(BookReadingStatus)
-    @IsNotEmpty()
-    readingStatus: BookReadingStatus;
 
     @IsOptional()
     owner: string;

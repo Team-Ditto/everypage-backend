@@ -19,10 +19,11 @@ export enum BookBorrowingStatus {
 }
 
 export enum BookCondition {
-    New = 'New',
     LikeNew = 'Like New',
+    VeryGood = 'Very Good',
     Good = 'Good',
-    Old = 'Old',
+    Fair = 'Fair',
+    Poor = 'Poor',
 }
 
 @Schema({ timestamps: true, versionKey: false })
@@ -36,26 +37,20 @@ export class Book {
     @Prop({ type: String })
     edition: string;
 
-    @Prop({ type: String })
-    description: string;
-
     @Prop({ type: String, enum: BookCondition })
-    condition: BookCondition;
+    bookCondition: BookCondition;
 
     @Prop({ type: [String] })
     images: string[];
 
     @Prop({ type: Number, length: 13 })
-    isbn: number;
+    ISBN: number;
 
     @Prop({ type: String })
     language: string;
 
     @Prop({ type: String })
     location: string;
-
-    @Prop({ type: [String] })
-    tags: string[];
 
     @Prop({ type: String })
     genre: string;
