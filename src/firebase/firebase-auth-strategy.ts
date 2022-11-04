@@ -5,10 +5,19 @@ import { Strategy, ExtractJwt } from 'passport-firebase-jwt';
 import * as firebase from 'firebase-admin';
 
 import { EnvironmentVariables } from 'src/env.validation';
+import { DecodedIdToken } from 'firebase-admin/lib/auth/token-verifier';
+
+declare global {
+    // eslint-disable-next-line @typescript-eslint/no-namespace
+    namespace Express {
+        // eslint-disable-next-line @typescript-eslint/no-empty-interface
+        interface User extends DecodedIdToken {}
+    }
+}
 
 @Injectable()
 export default class FirebaseAuthStrategy extends PassportStrategy(Strategy) {
-    firebaseApp: any;
+    firebaseApp: firebase.app.App;
 
     constructor(private config: ConfigService<EnvironmentVariables>) {
         super({
@@ -33,8 +42,8 @@ export default class FirebaseAuthStrategy extends PassportStrategy(Strategy) {
         });
     }
 
-    async validate(token: string) {
-        const firebaseUser: any = await this.firebaseApp
+    async validate(token: string): Promise<DecodedIdToken> {
+        const firebaseUser = await this.firebaseApp
             .auth()
             .verifyIdToken(token, true)
             .catch((err: Error) => {

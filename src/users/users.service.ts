@@ -1,3 +1,4 @@
+import { Request } from 'express';
 import { ConfigService } from '@nestjs/config';
 import { HttpException, HttpStatus, Injectable, Logger, Req } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
@@ -6,11 +7,6 @@ import { Model } from 'mongoose';
 import { EnvironmentVariables } from 'src/env.validation';
 import { User, UserDocument } from './entities/user.entity';
 import { CreateUserDto, UpdateUserDto } from './dto';
-import { Request } from 'express';
-
-export interface FirebaseUser {
-    uid: string;
-}
 
 export enum WishlistOperation {
     Add = 'add',
@@ -64,7 +60,7 @@ export class UsersService {
      */
     async myProfile(@Req() req: Request) {
         try {
-            return this.userModel.findById((req.user as FirebaseUser).uid).populate('wishlists');
+            return this.userModel.findById(req.user.uid).populate('wishlists');
         } catch (error) {
             this.logger.error(error);
             throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -90,11 +86,7 @@ export class UsersService {
         };
 
         try {
-            const updatedProfile = await this.userModel.findByIdAndUpdate(
-                (req.user as FirebaseUser).uid,
-                updateUserDto,
-                updateOptions,
-            );
+            const updatedProfile = await this.userModel.findByIdAndUpdate(req.user.uid, updateUserDto, updateOptions);
 
             return updatedProfile;
         } catch (error) {

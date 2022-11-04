@@ -5,7 +5,7 @@ import { Model } from 'mongoose';
 
 import { Wishlist, WishlistDocument, WishlistStatus } from './entities/wishlist.entity';
 import { CreateWishlistDto, UpdateWishlistDto } from './dto';
-import { FirebaseUser, UsersService, WishlistOperation } from 'src/users/users.service';
+import { UsersService, WishlistOperation } from 'src/users/users.service';
 
 @Injectable()
 export class WishlistsService {
@@ -18,13 +18,11 @@ export class WishlistsService {
 
     async createNewWishlist(@Req() req: Request, createWishlistDto: CreateWishlistDto): Promise<WishlistDocument> {
         try {
-            createWishlistDto.owner = (req.user as FirebaseUser).uid;
+            createWishlistDto.owner = req.user.uid;
 
             const wishlist = await this.wishlistModel.create(createWishlistDto);
 
-            await this.userService.updateUsersWishlists(WishlistOperation.Add, (req.user as FirebaseUser).uid, [
-                wishlist._id,
-            ]);
+            await this.userService.updateUsersWishlists(WishlistOperation.Add, req.user.uid, [wishlist._id]);
 
             return wishlist;
         } catch (error) {
@@ -37,9 +35,16 @@ export class WishlistsService {
         try {
             this.logger.log('getting all the wishlists by ' + wishListStatus);
             const results = await this.wishlistModel
-                .find({ owner: (req.user as FirebaseUser).uid, status: wishListStatus })
+                .find({ owner: req.user.uid, status: wishListStatus })
                 .populate('owner')
-                .populate('book');
+                .populate({
+                    path: 'book',
+                    model: 'Book',
+                    populate: {
+                        path: 'owner',
+                        model: 'User',
+                    },
+                });
             this.logger.log('Found ' + results.length + ' wishlists');
 
             return results;
@@ -86,8 +91,8 @@ export class WishlistsService {
 
     async deleteMultipleWishlists(@Req() req: Request, ids: string[]) {
         try {
-            await this.wishlistModel.deleteMany({ _id: { $in: ids }, owner: (req.user as FirebaseUser).uid });
-            await this.userService.updateUsersWishlists(WishlistOperation.Remove, (req.user as FirebaseUser).uid, ids);
+            await this.wishlistModel.deleteMany({ _id: { $in: ids }, owner: req.user.uid });
+            await this.userService.updateUsersWishlists(WishlistOperation.Remove, req.user.uid, ids);
         } catch (error) {
             this.logger.error(error);
             throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);

@@ -1,9 +1,9 @@
-import { Controller, Get, Post, Body, Put, Param, Delete, UseGuards, Req } from '@nestjs/common';
+import { Controller, Get, Post, Body, Put, Param, Delete, UseGuards, Req, Query } from '@nestjs/common';
 import { Request } from 'express';
 
 import { FirebaseAuthGuard } from 'src/firebase/firebase-auth.guard';
 import { BooksService } from './books.service';
-import { CreateBookDto, UpdateBookDto } from './dto';
+import { CreateBookDto, UpdateBookDto, BookFilterCriteria } from './dto';
 
 @Controller('books')
 @UseGuards(FirebaseAuthGuard)
@@ -16,18 +16,23 @@ export class BooksController {
     }
 
     @Get('mine')
-    getMyBooks(@Req() req: Request) {
-        return this.booksService.getMyBooks(req);
+    getMyBooks(@Req() req: Request, @Query() filterCriteria: BookFilterCriteria) {
+        return this.booksService.getMyBooks(req, filterCriteria);
     }
 
     @Get('all')
-    getAllBooks() {
-        return this.booksService.getAllBooks();
+    getAllBooks(@Query() filterCriteria: BookFilterCriteria) {
+        return this.booksService.getAllBooks(filterCriteria);
     }
 
-    @Get('user/:id')
-    getUserBooks(@Param('id') id: string) {
-        return this.booksService.getUserBooks(id);
+    @Get('users')
+    getUserBooks(@Req() req: Request, @Query() filterCriteria: BookFilterCriteria) {
+        return this.booksService.getUserBooks(req, filterCriteria);
+    }
+
+    @Get('users/:id')
+    getUserBooksById(@Param('id') id: string) {
+        return this.booksService.getUserBooksById(id);
     }
 
     @Get(':id')

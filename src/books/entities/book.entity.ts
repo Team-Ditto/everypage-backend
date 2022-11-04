@@ -28,10 +28,10 @@ export enum BookCondition {
 
 @Schema({ timestamps: true, versionKey: false })
 export class Book {
-    @Prop({ required: true })
+    @Prop({ required: true, index: true })
     title: string;
 
-    @Prop({ type: String })
+    @Prop({ type: String, index: true })
     author: string;
 
     @Prop({ type: String })
@@ -46,31 +46,31 @@ export class Book {
     @Prop({ type: Number, length: 13 })
     ISBN: number;
 
-    @Prop({ type: String })
+    @Prop({ type: String, index: true })
     language: string;
 
-    @Prop({ type: String })
+    @Prop({ type: String, index: true })
     location: string;
 
-    @Prop({ type: String })
+    @Prop({ type: String, index: true })
     genre: string;
 
     @Prop({ type: String, ref: 'User' })
     owner: User;
 
-    @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Library' })
-    library: Library;
-
     @Prop({ type: String, ref: 'User' })
     bearer: User;
 
-    @Prop({ type: Boolean })
+    @Prop({ type: String, ref: 'User' })
+    requestor: User;
+
+    @Prop({ type: Boolean, index: true })
     shareable: boolean;
 
-    @Prop({ type: String, enum: BookReadingStatus })
+    @Prop({ type: String, enum: BookReadingStatus, index: true })
     readingStatus: BookReadingStatus;
 
-    @Prop({ type: String, enum: BookBorrowingStatus })
+    @Prop({ type: String, enum: BookBorrowingStatus, default: BookBorrowingStatus.Available })
     borrowingStatus: BookBorrowingStatus;
 
     @Prop({ type: String })
