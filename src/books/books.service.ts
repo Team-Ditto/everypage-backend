@@ -67,8 +67,6 @@ export class BooksService {
                 query.location = filterCriteria.location;
             }
 
-            console.log(query);
-
             const sortStr = `${filterCriteria.sortOrder === 'asc' ? '' : '-'}${filterCriteria.sortBy}`;
 
             const results = await this.bookModel
@@ -168,15 +166,13 @@ export class BooksService {
                 const userIds = await this.userService.getUserIdsWithinTheLocation(
                     req.user._id,
                     [req.user.location.coordinates[0], req.user.location.coordinates[1]],
-                    +filterCriteria.location * 1000,
+                    +filterCriteria.location,
                 );
 
                 query.owner = { $in: userIds };
             } else {
                 query.owner = { $ne: req.user._id };
             }
-
-            console.log(query);
 
             const sortStr = `${filterCriteria.sortOrder === 'asc' ? '' : '-'}${filterCriteria.sortBy}`;
 
