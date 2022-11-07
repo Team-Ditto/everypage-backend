@@ -16,13 +16,19 @@ export class WishlistsService {
         private userService: UsersService,
     ) {}
 
+    /**
+     * creates a new wishlist
+     * @param req the request
+     * @param createWishlistDto the create wishlist DTO
+     * @returns the wishlist
+     */
     async createNewWishlist(@Req() req: Request, createWishlistDto: CreateWishlistDto): Promise<WishlistDocument> {
         try {
-            createWishlistDto.owner = req.user.uid;
+            createWishlistDto.owner = req.user._id;
 
             const wishlist = await this.wishlistModel.create(createWishlistDto);
 
-            await this.userService.updateUsersWishlists(WishlistOperation.Add, req.user.uid, [wishlist._id]);
+            await this.userService.updateUsersWishlists(WishlistOperation.Add, req.user._id, [wishlist._id]);
 
             return wishlist;
         } catch (error) {
@@ -31,11 +37,17 @@ export class WishlistsService {
         }
     }
 
+    /**
+     * gets the wishlists based on status
+     * @param req the request
+     * @param wishListStatus the wishlist status
+     * @returns the wishlists
+     */
     async getWishlistsByStatus(@Req() req: Request, wishListStatus: WishlistStatus): Promise<WishlistDocument[]> {
         try {
             this.logger.log('getting all the wishlists by ' + wishListStatus);
             const results = await this.wishlistModel
-                .find({ owner: req.user.uid, status: wishListStatus })
+                .find({ owner: req.user._id, status: wishListStatus })
                 .populate('owner')
                 .populate({
                     path: 'book',
@@ -54,6 +66,11 @@ export class WishlistsService {
         }
     }
 
+    /**
+     * gets the wishlist by ID
+     * @param wishlistId the wishlist ID
+     * @returns the wishlist
+     */
     async getWishlistById(wishlistId: string): Promise<WishlistDocument> {
         try {
             return await this.wishlistModel.findById(wishlistId).populate('owner').populate('book');
@@ -63,6 +80,12 @@ export class WishlistsService {
         }
     }
 
+    /**
+     * updated the wishlist by ID
+     * @param wishlistId the wishlist ID
+     * @param updateWishlistDto the update wishlist DTO
+     * @returns the wishlist
+     */
     async updateWishlistById(wishlistId: string, updateWishlistDto: UpdateWishlistDto): Promise<WishlistDocument> {
         const updateOptions = {
             // Create if not already there.
@@ -89,10 +112,46 @@ export class WishlistsService {
         }
     }
 
-    async deleteMultipleWishlists(@Req() req: Request, ids: string[]) {
+    /**
+     * deletes single/multiple wishlists
+     * @param req the request
+     * @param ids the ids
+     * @returns the ids of deleted wishlists
+     */
+    async deleteMultipleWishlists(@Req() req: Request, ids: string[]): Promise<string[]> {
         try {
-            await this.wishlistModel.deleteMany({ _id: { $in: ids }, owner: req.user.uid });
-            await this.userService.updateUsersWishlists(WishlistOperation.Remove, req.user.uid, ids);
+            await this.wishlistModel.deleteMany({ _id: { $in: ids }, owner: req.user._id });
+
+            await this.userService.updateUsersWishlists(WishlistOperation.Remove, req.user._id, ids);
+
+            return ids;
+        } catch (error) {
+            this.logger.error(error);
+            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * deletes the wishlist based on book ID 
+     * @param req the request
+     * @param bookId the book ID
+     * @returns the wishlist
+     */
+    async deleteWishlistByBookId(@Req() req: Request, bookId: string): Promise<WishlistDocument> {
+        try {
+            const deleteOptions = {
+                // Return the new object instead of the original.
+                new: true,
+            };
+
+            const deletedWishlist = await this.wishlistModel.findOneAndDelete(
+                { book: bookId, owner: req.user._id },
+                deleteOptions,
+            );
+
+            await this.userService.updateUsersWishlists(WishlistOperation.Remove, req.user._id, [deletedWishlist._id]);
+
+            return deletedWishlist;
         } catch (error) {
             this.logger.error(error);
             throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);

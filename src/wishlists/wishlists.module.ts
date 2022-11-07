@@ -8,7 +8,7 @@ import { WishlistsController } from './wishlists.controller';
 import { Wishlist, WishlistSchema } from './entities/wishlist.entity';
 
 @Module({
-    imports: [UsersModule, MongooseModule.forFeature([{ name: Wishlist.name, schema: WishlistSchema }])],
+    imports: [MongooseModule.forFeature([{ name: Wishlist.name, schema: WishlistSchema }]), UsersModule],
     controllers: [WishlistsController],
     providers: [WishlistsService],
 })

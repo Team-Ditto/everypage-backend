@@ -20,8 +20,8 @@ const PointSchema = new mongoose.Schema<PointSchemaType>(
     {
         type: {
             type: String,
-            enum: ['point'],
-            default: 'point',
+            enum: ['Point'],
+            default: 'Point',
             required: true,
         },
         coordinates: {
@@ -46,7 +46,7 @@ export class User {
     @Prop({ type: String, required: true })
     photoURL: string;
 
-    @Prop({ type: PointSchema })
+    @Prop({ type: PointSchema, index: '2dsphere' })
     location: PointSchemaType;
 
     @Prop({ type: String, enum: ReaderType })

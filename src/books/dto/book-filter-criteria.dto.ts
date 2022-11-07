@@ -1,4 +1,4 @@
-import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsEnum, IsOptional, IsString } from 'class-validator';
 
 import {
     DEFAULT_PAGE,
@@ -33,7 +33,11 @@ export class BookFilterCriteria {
     @IsOptional()
     genre: string;
 
-    @IsEnum(BookReadingStatus)
     @IsOptional()
+    @IsEnum(BookReadingStatus)
     readingStatus: BookReadingStatus;
+
+    @IsString()
+    @IsOptional()
+    location: string;
 }

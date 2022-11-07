@@ -20,6 +20,11 @@ export class BooksController {
         return this.booksService.getMyBooks(req, filterCriteria);
     }
 
+    @Get('mine/locations')
+    getMyBookLocations(@Req() req: Request) {
+        return this.booksService.getMyBookLocations(req);
+    }
+
     @Get('all')
     getAllBooks(@Query() filterCriteria: BookFilterCriteria) {
         return this.booksService.getAllBooks(filterCriteria);
@@ -43,10 +48,5 @@ export class BooksController {
     @Put(':id')
     updateBookById(@Param('id') id: string, @Body() updateBookDto: UpdateBookDto) {
         return this.booksService.updateBookById(id, updateBookDto);
-    }
-
-    @Delete(':id')
-    remove(@Param('id') id: string) {
-        return this.booksService.remove(id);
     }
 }

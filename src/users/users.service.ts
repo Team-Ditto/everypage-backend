@@ -55,12 +55,21 @@ export class UsersService {
     }
 
     /**
+     * gets the user by ID
+     * @param userId the user ID
+     * @returns the user
+     */
+    async getUserById(userId: string): Promise<UserDocument> {
+        return this.userModel.findById(userId);
+    }
+
+    /**
      * return my profile
      * @returns my user
      */
     async myProfile(@Req() req: Request) {
         try {
-            return this.userModel.findById(req.user.uid).populate('wishlists');
+            return this.userModel.findById(req.user._id).populate('wishlists');
         } catch (error) {
             this.logger.error(error);
             throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -86,17 +95,13 @@ export class UsersService {
         };
 
         try {
-            const updatedProfile = await this.userModel.findByIdAndUpdate(req.user.uid, updateUserDto, updateOptions);
+            const updatedProfile = await this.userModel.findByIdAndUpdate(req.user._id, updateUserDto, updateOptions);
 
             return updatedProfile;
         } catch (error) {
             this.logger.error(error);
             throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-    }
-
-    remove(id: number) {
-        return `This action removes a #${id} user`;
     }
 
     /**
@@ -126,5 +131,50 @@ export class UsersService {
         }
 
         await this.userModel.findOneAndUpdate({ _id: userId }, updateQuery, updateOptions);
+    }
+
+    /**
+     * returns the IDs of the user that fall within the boundaries
+     * @param currentUserId the current user ID
+     * @param coordinates the coordinates of the current user
+     * @param maxDistance the max distance
+     * @returns the user IDs
+     */
+    async getUserIdsWithinTheLocation(
+        currentUserId: string,
+        coordinates: [number, number],
+        maxDistance: number,
+    ): Promise<string[]> {
+        console.log(currentUserId);
+        console.log(coordinates);
+        console.log(maxDistance);
+
+        const users = await this.userModel.aggregate<UserDocument>([
+            {
+                $geoNear: {
+                    near: {
+                        type: 'Point',
+                        coordinates,
+                    },
+                    distanceField: 'dist.calculated',
+                    maxDistance,
+                    includeLocs: 'dist.location',
+                },
+            },
+            {
+                $match: {
+                    _id: {
+                        $ne: currentUserId,
+                    },
+                },
+            },
+            {
+                $project: {
+                    _id: 1,
+                },
+            },
+        ]);
+
+        return users.map(item => item._id);
     }
 }

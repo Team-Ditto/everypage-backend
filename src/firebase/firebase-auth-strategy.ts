@@ -5,13 +5,14 @@ import { Strategy, ExtractJwt } from 'passport-firebase-jwt';
 import * as firebase from 'firebase-admin';
 
 import { EnvironmentVariables } from 'src/env.validation';
-import { DecodedIdToken } from 'firebase-admin/lib/auth/token-verifier';
+import { UsersService } from 'src/users/users.service';
+import { UserDocument } from 'src/users/entities/user.entity';
 
 declare global {
     // eslint-disable-next-line @typescript-eslint/no-namespace
     namespace Express {
         // eslint-disable-next-line @typescript-eslint/no-empty-interface
-        interface User extends DecodedIdToken {}
+        interface User extends UserDocument {}
     }
 }
 
@@ -19,7 +20,7 @@ declare global {
 export default class FirebaseAuthStrategy extends PassportStrategy(Strategy) {
     firebaseApp: firebase.app.App;
 
-    constructor(private config: ConfigService<EnvironmentVariables>) {
+    constructor(private config: ConfigService<EnvironmentVariables>, private userService: UsersService) {
         super({
             jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
         });
@@ -42,7 +43,7 @@ export default class FirebaseAuthStrategy extends PassportStrategy(Strategy) {
         });
     }
 
-    async validate(token: string): Promise<DecodedIdToken> {
+    async validate(token: string): Promise<UserDocument> {
         const firebaseUser = await this.firebaseApp
             .auth()
             .verifyIdToken(token, true)
@@ -56,6 +57,8 @@ export default class FirebaseAuthStrategy extends PassportStrategy(Strategy) {
             throw new UnauthorizedException();
         }
 
-        return firebaseUser;
+        const user = this.userService.getUserById(firebaseUser.uid);
+
+        return user;
     }
 }
