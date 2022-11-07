@@ -9,7 +9,6 @@ import { UsersModule } from './users/users.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { validate } from './env.validation';
-import { LibrariesModule } from './libraries/libraries.module';
 import { WishlistsModule } from './wishlists/wishlists.module';
 
 @Module({
@@ -21,7 +20,6 @@ import { WishlistsModule } from './wishlists/wishlists.module';
         MongooseModule.forRoot(process.env.MONGODB_URI),
         BooksModule,
         UsersModule,
-        LibrariesModule,
         WishlistsModule,
     ],
     controllers: [AppController],
