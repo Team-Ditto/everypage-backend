@@ -61,6 +61,13 @@ export class UpdateBookDto {
     @IsOptional()
     bearer: string;
 
+    @IsOptional()
+    requestor: string;
+
+    @IsBoolean()
+    @IsOptional()
+    bookReturnRequest: boolean;
+
     @IsString()
     @IsOptional()
     notes: string;

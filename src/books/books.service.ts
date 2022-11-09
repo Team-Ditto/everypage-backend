@@ -217,7 +217,7 @@ export class BooksService {
      */
     async getBookById(bookId: string): Promise<BookDocument> {
         try {
-            return await (await this.bookModel.findById(bookId)).populate('owner');
+            return await this.bookModel.findById(bookId).populate('owner').populate('requestor').populate('bearer');
         } catch (error) {
             this.logger.error(error);
             throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -244,7 +244,9 @@ export class BooksService {
 
         try {
             // validate the update for oneself
-            const updatedBook = await this.bookModel.findByIdAndUpdate(bookId, updateBookDto, updateOptions);
+            const updatedBook = await this.bookModel
+                .findByIdAndUpdate(bookId, updateBookDto, updateOptions)
+                .populate('owner');
 
             return updatedBook;
         } catch (error) {

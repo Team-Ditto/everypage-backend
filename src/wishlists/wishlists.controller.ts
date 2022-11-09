@@ -24,7 +24,7 @@ export class WishlistsController {
     @Get(':id')
     getWishlistById(@Param('id') id: string): Promise<WishlistDocument> {
         return this.wishlistsService.getWishlistById(id);
-    } 
+    }
 
     @Put(':id')
     updateWishlistById(
@@ -41,6 +41,6 @@ export class WishlistsController {
 
     @Delete('book/:id')
     deleteWishlistByBookId(@Req() req: Request, @Param('id') id: string): Promise<WishlistDocument> {
-        return this.wishlistsService.deleteWishlistByBookId(req, id);
+        return this.wishlistsService.deleteWishlistByBookId(req.user._id, id);
     }
 }

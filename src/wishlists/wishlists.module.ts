@@ -11,5 +11,6 @@ import { Wishlist, WishlistSchema } from './entities/wishlist.entity';
     imports: [MongooseModule.forFeature([{ name: Wishlist.name, schema: WishlistSchema }]), UsersModule],
     controllers: [WishlistsController],
     providers: [WishlistsService],
+    exports: [WishlistsService],
 })
 export class WishlistsModule {}

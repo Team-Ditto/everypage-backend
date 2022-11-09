@@ -5,11 +5,12 @@ import { MongooseModule } from '@nestjs/mongoose';
 import FirebaseJwtStrategy from 'src/firebase/firebase-auth-strategy';
 import { BooksModule } from './books/books.module';
 import { UsersModule } from './users/users.module';
+import { SharedModule } from './shared/shared.module';
+import { WishlistsModule } from './wishlists/wishlists.module';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { validate } from './env.validation';
-import { WishlistsModule } from './wishlists/wishlists.module';
 
 @Module({
     imports: [
@@ -18,9 +19,10 @@ import { WishlistsModule } from './wishlists/wishlists.module';
             validate,
         }),
         MongooseModule.forRoot(process.env.MONGODB_URI),
-        BooksModule,
         UsersModule,
+        BooksModule,
         WishlistsModule,
+        SharedModule,
     ],
     controllers: [AppController],
     providers: [FirebaseJwtStrategy, AppService],

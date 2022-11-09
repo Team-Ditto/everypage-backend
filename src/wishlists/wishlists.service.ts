@@ -132,12 +132,12 @@ export class WishlistsService {
     }
 
     /**
-     * deletes the wishlist based on book ID 
-     * @param req the request
+     * deletes the wishlist based on book ID
+     * @param userId the user ID
      * @param bookId the book ID
      * @returns the wishlist
      */
-    async deleteWishlistByBookId(@Req() req: Request, bookId: string): Promise<WishlistDocument> {
+    async deleteWishlistByBookId(userId: string, bookId: string): Promise<WishlistDocument> {
         try {
             const deleteOptions = {
                 // Return the new object instead of the original.
@@ -145,13 +145,50 @@ export class WishlistsService {
             };
 
             const deletedWishlist = await this.wishlistModel.findOneAndDelete(
-                { book: bookId, owner: req.user._id },
+                { book: bookId, owner: userId },
                 deleteOptions,
             );
 
-            await this.userService.updateUsersWishlists(WishlistOperation.Remove, req.user._id, [deletedWishlist._id]);
+            await this.userService.updateUsersWishlists(WishlistOperation.Remove, userId, [deletedWishlist._id]);
 
             return deletedWishlist;
+        } catch (error) {
+            this.logger.error(error);
+            throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * deletes the wishlist based on book ID
+     * @param userId the user ID
+     * @param bookId the book ID
+     * @param updateWishlistDto the update wishlist DTO
+     * @returns the wishlist
+     */
+    async updateWishlistByBookId(
+        userId: string,
+        bookId: string,
+        updateWishlistDto: UpdateWishlistDto,
+    ): Promise<WishlistDocument> {
+        try {
+            const updateOptions = {
+                // Create if not already there.
+                upsert: false,
+
+                // Return the new object instead of the original.
+                new: true,
+
+                // Apply the defaults specified in the model's schema if a new document is created.
+                setDefaultsOnInsert: false,
+            };
+
+            const updatedWishlist = await this.wishlistModel.findOneAndUpdate(
+                { book: bookId, owner: userId },
+                updateWishlistDto,
+                updateOptions,
+            );
+
+            return updatedWishlist;
         } catch (error) {
             this.logger.error(error);
             throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);

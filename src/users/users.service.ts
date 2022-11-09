@@ -69,7 +69,9 @@ export class UsersService {
      */
     async myProfile(@Req() req: Request) {
         try {
-            return this.userModel.findById(req.user._id).populate('wishlists');
+            const user = await this.userModel.findById(req.user._id).populate('wishlists');
+
+            return user;
         } catch (error) {
             this.logger.error(error);
             throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);

@@ -63,7 +63,10 @@ export class Book {
     @Prop({ type: String, ref: 'User' })
     requestor: User;
 
-    @Prop({ type: Boolean, index: true })
+    @Prop({ type: Boolean, default: false })
+    bookReturnRequest: boolean;
+
+    @Prop({ type: Boolean, index: true, default: false })
     shareable: boolean;
 
     @Prop({ type: String, enum: BookReadingStatus, index: true })
