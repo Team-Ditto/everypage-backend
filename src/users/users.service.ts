@@ -31,6 +31,14 @@ export class UsersService {
         try {
             this.logger.debug('***** creating new user *****');
 
+            const user = await this.userModel.findOne({
+                $or: [{ _id: createUserDto._id }, { email: createUserDto.email }],
+            });
+
+            if (user) {
+                throw new Error('User already exists!');
+            }
+
             const newUser = new this.userModel(createUserDto);
             newUser.save();
 
