@@ -42,8 +42,7 @@ export class UsersService {
             const newUser = new this.userModel(createUserDto);
             newUser.save();
 
-            this.logger.debug('***** creating new user completed *****');
-            this.logger.debug('New user created' + newUser._id);
+            this.logger.debug('New user created ' + newUser._id);
 
             return HttpStatus.CREATED;
         } catch (error) {
@@ -155,10 +154,6 @@ export class UsersService {
         coordinates: [number, number],
         maxDistance: number,
     ): Promise<string[]> {
-        console.log(currentUserId);
-        console.log(coordinates);
-        console.log(maxDistance);
-
         const users = await this.userModel.aggregate<UserDocument>([
             {
                 $geoNear: {
