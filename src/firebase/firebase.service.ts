@@ -14,8 +14,8 @@ export class FirebaseService {
             credential: firebase.credential.cert({
                 type: this.config.get<string>('FIREBASE_TYPE'),
                 projectId: this.config.get<string>('FIREBASE_PROJECT_ID'),
-                privateKeyId: this.config.get<string>('FIREBASE_PRIVATE_KEY_ID').replace(/\\n/g, '\n'),
-                privateKey: this.config.get<string>('FIREBASE_PRIVATE_KEY'),
+                privateKeyId: this.config.get<string>('FIREBASE_PRIVATE_KEY_ID'),
+                privateKey: this.config.get<string>('FIREBASE_PRIVATE_KEY').replace(/\\n/g, '\n'),
                 clientEmail: this.config.get<string>('FIREBASE_CLIENT_EMAIL'),
                 clientId: this.config.get<string>('FIREBASE_CLIENT_ID'),
                 authUri: this.config.get<string>('FIREBASE_AUTH_URI'),
