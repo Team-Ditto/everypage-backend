@@ -13,8 +13,8 @@ export enum BookReadingStatus {
 
 export enum BookBorrowingStatus {
     Available = 'Available',
-    Hold = 'Hold',
-    Using = 'Using',
+    Hold = 'On-Hold',
+    Using = 'In-Use',
 }
 
 export enum BookCondition {
