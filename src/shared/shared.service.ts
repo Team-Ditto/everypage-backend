@@ -101,9 +101,13 @@ export class SharedService {
 
                     this.logger.log('Updating wishlist by id');
 
-                    const wishlist: WishlistDocument = await this.wishlistsService.updateWishlistById(data.wishlist, {
-                        status: WishlistStatus.ForLater,
-                    } as UpdateWishlistDto);
+                    const wishlist: WishlistDocument = await this.wishlistsService.updateWishlistByBookId(
+                        req.user._id,
+                        data.book,
+                        {
+                            status: WishlistStatus.ForLater,
+                        } as UpdateWishlistDto,
+                    );
 
                     const updatedBook = await this.booksService.updateBookById((wishlist.book as BookDocument)._id, {
                         borrowingStatus: BookBorrowingStatus.Available,
