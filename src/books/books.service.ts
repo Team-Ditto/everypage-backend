@@ -52,7 +52,7 @@ export class BooksService {
         try {
             this.logger.log('getting all of my books');
 
-            const query = this.getCalculatedFilterCriteria(filterCriteria, true);
+            const query = this.getCalculatedFilterCriteria(filterCriteria, false);
 
             query['$or'] = [
                 {
