@@ -57,10 +57,10 @@ export class Book {
     @Prop({ type: String, ref: 'User' })
     owner: User;
 
-    @Prop({ type: String, ref: 'User' })
+    @Prop({ type: String, ref: 'User', default: null })
     bearer: User;
 
-    @Prop({ type: String, ref: 'User' })
+    @Prop({ type: String, ref: 'User', default: null })
     requestor: User;
 
     @Prop({ type: Boolean, default: false })
