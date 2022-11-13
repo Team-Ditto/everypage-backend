@@ -1,20 +1,21 @@
 import { UpdateWishlistDto } from './../wishlists/dto/update-wishlist.dto';
 import { Request } from 'express';
 import { Injectable, Req, HttpException, HttpStatus, Logger } from '@nestjs/common';
-import { getFirestore } from 'firebase-admin/firestore';
+import { firestore } from 'firebase-admin';
+import { getFirestore, Timestamp } from 'firebase-admin/firestore';
 
+import { FirebaseService } from 'src/firebase/firebase.service';
 import { UsersService } from 'src/users/users.service';
 import { BooksService } from 'src/books/books.service';
 import { WishlistsService } from 'src/wishlists/wishlists.service';
 
-import { UserDocument } from 'src/users/entities/user.entity';
+import { User, UserDocument } from 'src/users/entities/user.entity';
 import { WishlistDocument, WishlistStatus } from 'src/wishlists/entities/wishlist.entity';
 import { BookDocument, BookBorrowingStatus } from 'src/books/entities/book.entity';
 
 import { CreateWishlistDto } from 'src/wishlists/dto';
 import { HandleTriggerRequestDto } from './dto/handle-trigger-request.dto';
 import { UpdateBookDto } from 'src/books/dto';
-import { FirebaseService } from 'src/firebase/firebase.service';
 
 export enum TriggerType {
     RequestToBorrow = 'request_to_borrow',
@@ -35,7 +36,7 @@ export interface NotificationObject {
     created: Date;
     owner: any;
     book: any;
-    initiator?: any;
+    initiator: any;
     status: NotificationStatus;
     chatRedirect: boolean;
 }
@@ -149,6 +150,8 @@ export class SharedService {
                         updatedBook,
                     );
 
+                    await this.createChats(data.triggerType, updatedBook, relatedBook.requestor, req.user);
+
                     return;
                 }
 
@@ -195,6 +198,8 @@ export class SharedService {
                         updatedBook,
                     );
 
+                    await this.createChats(data.triggerType, updatedBook, updatedBook.owner, req.user);
+
                     return;
                 }
 
@@ -218,89 +223,163 @@ export class SharedService {
         initiator: UserDocument,
         book: BookDocument,
     ) {
-        let newNotification: NotificationObject;
+        try {
+            let newNotification: NotificationObject;
 
-        switch (triggerType) {
-            case TriggerType.RequestToBorrow:
-                newNotification = {
-                    title: 'Book Requested',
-                    description: `${initiator.displayName} requested to borrow ${book.title}. Tap to confirm request.`,
-                    status: NotificationStatus.Unread,
-                    owner: owner._id,
-                    initiator: initiator._id,
-                    book: book._id.toString(),
-                    created: new Date(),
-                    chatRedirect: false,
-                };
+            switch (triggerType) {
+                case TriggerType.RequestToBorrow:
+                    newNotification = {
+                        title: 'Book Requested',
+                        description: `${initiator.displayName} requested to borrow ${book.title}. Tap to confirm request.`,
+                        chatRedirect: false,
+                    } as NotificationObject;
 
-                break;
+                    break;
 
-            case TriggerType.CancelHold:
-                newNotification = {
-                    title: 'Book Request Cancelled',
-                    description: `${initiator.displayName} cancelled the requested to borrow ${book.title}.`,
-                    status: NotificationStatus.Unread,
-                    owner: owner._id,
-                    initiator: initiator._id,
-                    book: book._id.toString(),
-                    created: new Date(),
-                    chatRedirect: false,
-                };
+                case TriggerType.CancelHold:
+                    newNotification = {
+                        title: 'Book Request Cancelled',
+                        description: `${initiator.displayName} cancelled the requested to borrow ${book.title}.`,
+                        chatRedirect: false,
+                    } as NotificationObject;
 
-                break;
+                    break;
 
-            case TriggerType.BorrowRequestAccept:
-                newNotification = {
-                    title: 'Borrowing Book Confirmation',
-                    description: `${initiator.displayName} accepted to lent ${book.title} to you. Tap to chat.`,
-                    status: NotificationStatus.Unread,
-                    owner: owner._id,
-                    initiator: initiator._id,
-                    book: book._id.toString(),
-                    created: new Date(),
-                    chatRedirect: true,
-                };
+                case TriggerType.BorrowRequestAccept:
+                    newNotification = {
+                        title: 'Borrowing Book Confirmation',
+                        description: `${initiator.displayName} accepted to lent ${book.title} to you. Tap to chat.`,
+                        chatRedirect: true,
+                    } as NotificationObject;
 
-                break;
+                    break;
 
-            case TriggerType.BorrowRequestDecline:
-                newNotification = {
-                    title: 'Borrowing Book Declined',
-                    description: `${initiator.displayName} declined to lent ${book.title} to you.`,
-                    status: NotificationStatus.Unread,
-                    owner: owner._id,
-                    initiator: initiator._id,
-                    book: book._id.toString(),
-                    created: new Date(),
-                    chatRedirect: false,
-                };
+                case TriggerType.BorrowRequestDecline:
+                    newNotification = {
+                        title: 'Borrowing Book Declined',
+                        description: `${initiator.displayName} declined to lent ${book.title} to you.`,
 
-                break;
+                        chatRedirect: false,
+                    } as NotificationObject;
 
-            case TriggerType.UserReturns:
-                newNotification = {
-                    title: 'Book Return Request',
-                    description: `${initiator.displayName} wants to return ${book.title}. Tap to chat.`,
-                    status: NotificationStatus.Unread,
-                    owner: owner._id,
-                    initiator: initiator._id,
-                    book: book._id.toString(),
-                    created: new Date(),
-                    chatRedirect: true,
-                };
+                    break;
 
-                break;
+                case TriggerType.UserReturns:
+                    newNotification = {
+                        title: 'Book Return Request',
+                        description: `${initiator.displayName} wants to return ${book.title}. Tap to chat.`,
+                        chatRedirect: true,
+                    } as NotificationObject;
 
-            default:
-                break;
+                    break;
+
+                default:
+                    break;
+            }
+
+            await this.getNotificationRef().set({
+                ...newNotification,
+                status: NotificationStatus.Unread,
+                owner: owner._id,
+                initiator: initiator._id,
+                book: book._id.toString(),
+                created: new Date(),
+            });
+        } catch (error) {
+            console.log(error);
         }
+    }
 
-        console.log(newNotification);
+    private async createChats(triggerType: TriggerType, book: BookDocument, owner: User, initiator: UserDocument) {
+        try {
+            let banner: string;
+            const combinedId = this.getCombinedUserId(owner._id, initiator._id);
+            const bookRef = {
+                _id: book._id.toString(),
+                title: book.title,
+                author: book.author,
+                images: book.images,
+                owner: book.owner._id.toString(),
+                borrowingStatus: book.borrowingStatus,
+            };
 
-        await this.getNotificationRef().set(newNotification);
+            switch (triggerType) {
+                case TriggerType.BorrowRequestAccept:
+                    banner = `${owner.displayName} placed book borrowing request.`;
+                    break;
+
+                case TriggerType.UserReturns:
+                    banner = `${initiator.displayName} placed book return request.`;
+                    break;
+
+                default:
+                    break;
+            }
+
+            const res: FirebaseFirestore.DocumentSnapshot = await this.getChatsRef(combinedId).get();
+
+            if (!res.exists) {
+                // create a chat in chats collection
+                await this.getChatsRef(combinedId).set({
+                    messages: [],
+                    banner,
+                    book: bookRef,
+                });
+
+                // create user chats for both related users
+                await this.getUserChatsRef(owner._id).update({
+                    chatRefs: firestore.FieldValue.arrayUnion({
+                        _id: combinedId,
+                        userInfo: {
+                            _id: initiator._id,
+                            displayName: initiator.displayName,
+                            photoURL: initiator.photoURL,
+                        },
+                        date: Timestamp.now(),
+                    }),
+                });
+
+                await this.getUserChatsRef(initiator._id).update({
+                    chatRefs: firestore.FieldValue.arrayUnion({
+                        _id: combinedId,
+                        userInfo: {
+                            _id: owner._id,
+                            displayName: owner.displayName,
+                            photoURL: owner.photoURL,
+                        },
+                        date: Timestamp.now(),
+                    }),
+                });
+            } else {
+                // update the chat in chats collection
+                await this.getChatsRef(combinedId).set(
+                    {
+                        banner,
+                        book: bookRef,
+                    },
+                    {
+                        merge: true,
+                    },
+                );
+            }
+        } catch (error) {
+            console.log(error);
+        }
     }
 
     private getNotificationRef(): FirebaseFirestore.DocumentReference {
         return this.db.collection('notifications').doc();
+    }
+
+    private getUserChatsRef(docId: string): FirebaseFirestore.DocumentReference {
+        return this.db.collection('userChats').doc(docId);
+    }
+
+    private getChatsRef(docId: string): FirebaseFirestore.DocumentReference {
+        return this.db.collection('chats').doc(docId);
+    }
+
+    private getCombinedUserId(user1: string, user2: string): string {
+        return user1 > user2 ? user1 + user2 : user2 + user1;
     }
 }
