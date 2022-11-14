@@ -26,11 +26,19 @@ export class WishlistsService {
         try {
             createWishlistDto.owner = req.user._id;
 
-            const wishlist = await this.wishlistModel.create(createWishlistDto);
+            const alreadyExist = await this.wishlistModel.findOne({
+                owner: req.user._id,
+                book: createWishlistDto.book,
+            });
 
-            await this.userService.updateUsersWishlists(WishlistOperation.Add, req.user._id, [wishlist._id]);
+            if (!alreadyExist) {
+                const wishlist = await this.wishlistModel.create(createWishlistDto);
 
-            return wishlist;
+                await this.userService.updateUsersWishlists(WishlistOperation.Add, req.user._id, [wishlist._id]);
+                return wishlist;
+            }
+
+            return alreadyExist;
         } catch (error) {
             this.logger.error(error);
             throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
