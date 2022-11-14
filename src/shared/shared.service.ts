@@ -36,6 +36,7 @@ export interface NotificationObject {
     created: Date;
     owner: any;
     book: any;
+    bookOwner: any;
     initiator: any;
     status: NotificationStatus;
     chatRedirect: boolean;
@@ -283,6 +284,7 @@ export class SharedService {
                 owner: owner._id,
                 initiator: initiator._id,
                 book: book._id.toString(),
+                bookOwner: book.owner._id.toString(),
                 created: new Date(),
             });
         } catch (error) {
