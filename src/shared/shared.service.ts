@@ -81,6 +81,12 @@ export class SharedService {
                         status: WishlistStatus.Requested,
                     } as UpdateWishlistDto);
 
+                    const relatedBook = await this.booksService.getBookById((wishlist.book as BookDocument)._id);
+
+                    if (relatedBook.borrowingStatus !== BookBorrowingStatus.Available) {
+                        throw new Error('This book is not available to borrow right now.');
+                    }
+
                     const updatedBook = await this.booksService.updateBookById((wishlist.book as BookDocument)._id, {
                         borrowingStatus: BookBorrowingStatus.Hold,
                         requestor: req.user.id,

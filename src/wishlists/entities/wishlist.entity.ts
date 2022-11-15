@@ -13,9 +13,6 @@ export enum WishlistStatus {
 
 @Schema({ timestamps: true, versionKey: false })
 export class Wishlist {
-    @Prop({ type: String })
-    name: string;
-
     @Prop({ type: String, ref: 'User' })
     owner: User;
 
