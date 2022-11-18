@@ -111,7 +111,7 @@ export class BooksService {
                 },
             ]);
 
-            return locations.map(item => item.location);
+            return [...new Set(locations.map(item => item.location))];
         } catch (error) {
             this.logger.error(error);
             throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
