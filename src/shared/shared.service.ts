@@ -308,6 +308,7 @@ export class SharedService {
                 author: book.author,
                 images: book.images,
                 owner: book.owner._id.toString(),
+                ownerName: book.owner.displayName,
                 borrowingStatus: book.borrowingStatus,
             };
 
